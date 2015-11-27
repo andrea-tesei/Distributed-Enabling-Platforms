@@ -101,6 +101,8 @@ public abstract class GossipManager extends Thread implements NotificationListen
 	public void createOrRevivieMember(LocalGossipMember m) 
 	{
 		members.put(m, GossipState.UP);
+		LocalGossipMember localMemberForModifyHB = this.getMemberList().get(this.getMemberList().indexOf(m));
+		localMemberForModifyHB.setHeartbeat(m.getHeartbeat());
 		if (listener != null) {
 			listener.gossipEvent(m, GossipState.UP);
 		}

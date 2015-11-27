@@ -85,6 +85,13 @@ public abstract class GossipManager extends Thread implements NotificationListen
 		LocalGossipMember deadMember = (LocalGossipMember) notification.getUserData();
 		GossipService.LOGGER.info("Dead member detected: " + deadMember);
 		members.put(deadMember, GossipState.DOWN);
+		
+		// TODO: The put method doesn't change the object inside the "members" map: it will change only the old value. We need to modify it manually.
+		LocalGossipMember localMemberForModifyHB = this.getDeadList().get(this.getDeadList().indexOf(deadMember));
+		// Here we set the last known Heartbeat of this gossip member to the last value known before its death.
+		localMemberForModifyHB.setLastKnownHeartbeat(deadMember.getHeartbeat());
+		// Finally, we reset to 0 the current Hearbeat in order to avoid problem in updating values after the possible "revive" of this gossip member.
+		localMemberForModifyHB.setHeartbeat(0);
 	
 		if (listener != null) {
 			listener.gossipEvent(deadMember, GossipState.DOWN);

@@ -56,17 +56,24 @@ public class OnlyProcessReceivedPassiveGossipThread extends PassiveGossipThread
 					// TODO: Or maybe when a member is declared dead for more than _settings.getCleanupInterval() ms, reset the heartbeat to 0.
 					// It will then accept a revived member.
 					// The above is now handle by checking whether the heartbeat differs _settings.getCleanupInterval(), it must be restarted.
-					if (remoteMember.getHeartbeat() == 1 || ((localDeadMember.getHeartbeat() - remoteMember.getHeartbeat()) * -1) > (gossipManager.getSettings().getCleanupInterval() / 1000) || remoteMember.getHeartbeat() > localDeadMember.getHeartbeat()) {
-						GossipService.LOGGER.debug("The remote member is back from the dead. We will remove it from the dead list and add it as a new member.");
-						// The remote member is back from the dead.
-						// Remove it from the dead list.
-						// gossipManager.getDeadList().remove(localDeadMember);
-						// Add it as a new member and add it to the member list.
-						LocalGossipMember newLocalMember = new LocalGossipMember(remoteMember.getHost(), remoteMember.getPort(), remoteMember.getId(), remoteMember.getHeartbeat(), gossipManager, gossipManager.getSettings().getCleanupInterval());
-						// gossipManager.getMemberList().add(newLocalMember);
-						gossipManager.createOrRevivieMember(newLocalMember);
-						newLocalMember.startTimeoutTimer();
-						GossipService.LOGGER.info("Removed remote member " + remoteMember.getAddress() + " from dead list and added to local member list.");
+					
+					
+					// The above is now handle by checking whether the last known heartbeat differs from the current remote one: 
+					// 		they are equal only if i receive an heartbeat for this gossip member from another member which hasn't detected the death yet. So we don't need to update in this case.
+					//		In other two cases we have to update our value and respawn the dead member.
+					if(localDeadMember.getLastKnownHeartbeat() != remoteMember.getHeartbeat()){
+						if (((localDeadMember.getLastKnownHeartbeat() - remoteMember.getHeartbeat()) * -1) > ((gossipManager.getSettings().getCleanupInterval() / 1000)) || remoteMember.getHeartbeat() > localDeadMember.getHeartbeat()) {
+							GossipService.LOGGER.debug("The remote member is back from the dead. We will remove it from the dead list and add it as a new member.");
+							// The remote member is back from the dead.
+							// Remove it from the dead list.
+							// gossipManager.getDeadList().remove(localDeadMember);
+							// Add it as a new member and add it to the member list.
+							LocalGossipMember newLocalMember = new LocalGossipMember(remoteMember.getHost(), remoteMember.getPort(), remoteMember.getId(), remoteMember.getHeartbeat(), gossipManager, gossipManager.getSettings().getCleanupInterval());
+							// gossipManager.getMemberList().add(newLocalMember);
+							gossipManager.createOrRevivieMember(newLocalMember);
+							newLocalMember.startTimeoutTimer();
+							GossipService.LOGGER.info("Removed remote member " + remoteMember.getAddress() + " from dead list and added to local member list.");
+						}
 					}
 				} else {
 					// Brand spanking new member - welcome.

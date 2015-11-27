@@ -18,6 +18,7 @@ public abstract class GossipMember implements Comparable<GossipMember>
 	protected final String _host;
 	protected final int _port;
 	protected int _heartbeat;
+	protected int _last_known_heartbeat;
 
 	/**
 	 * The purpose of the id field is to be able for nodes to identify themselves beyond there host/port. For example
@@ -84,6 +85,23 @@ public abstract class GossipMember implements Comparable<GossipMember>
 	public void setHeartbeat(int heartbeat) 
 	{
 		this._heartbeat = heartbeat;
+	}
+	
+	/**
+	 * Get the last known heartbeat. This value is updated whenever this gossip member die.
+	 * @return Last known heartbeat
+	 */
+	public int getLastKnownHeartbeat() {
+		return _last_known_heartbeat;
+	}
+	
+	/**
+	 * Set the current last known heartbeat.
+	 * @param _last_known_heartbeat the new last known heartbeat
+	 */
+
+	public void setLastKnownHeartbeat(int _last_known_heartbeat) {
+		this._last_known_heartbeat = _last_known_heartbeat;
 	}
 
 
